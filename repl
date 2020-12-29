@@ -1,5 +1,5 @@
 read-eval-print-loop ( or listener as gavin
-https://all-things-andy-gavin.com/2011/10/25/lispings-ala-john-mccarthy/)
+https://all-things-andy-gavin.com/2011/10/25/lispings-ala-john-mccarthy/ )
 - interactive shell to write&experiment lisp code
 - 4 step
   - read input
