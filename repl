@@ -1,0 +1,15 @@
+read-eval-print-loop ( or listener as gavin
+https://all-things-andy-gavin.com/2011/10/25/lispings-ala-john-mccarthy/)
+- interactive shell to write&experiment lisp code
+- 4 step
+  - read input
+  - evaluate input
+  - print the result from eval step
+  - loop back to read
+- dont need to restart the repl to try out new stuf, no need to compile and
+wait
+  - typical lisp program doesnt need restart repl at all in the entire dev
+  cycle
+- good for remote debugging(just tap to the repl ip:port then modify the code)
+  - NASA's 1998 Deep Space 1 mission debugging $100M hardware that is 100
+  milion miles away

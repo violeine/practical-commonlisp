@@ -1,0 +1,8 @@
+,rrr      start swank server
+,rC       clear repl
+,ro       compile form under cursor
+,rwR      close repl
+,rl       load current file
+,rof      compile and load
+cpaF-cpaf send form to repl
+
