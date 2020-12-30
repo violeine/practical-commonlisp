@@ -4,4 +4,6 @@
 ,rwR      close repl
 ,rl       load current file
 ,rof      compile and load
+,rI       inspect variable
+R         refresh variable
 cpaF-cpaf send form to repl
