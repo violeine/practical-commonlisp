@@ -37,6 +37,7 @@
 (dump-db)
 
 
+
 (defun prompt-read (prompt)
   (format *query-io* "~a: ~%" prompt)
   (force-output *query-io*) ; *query-io* is global for stream connect to tty
@@ -57,10 +58,49 @@
 ; (add-cds)
 
 (defun save-db (name)
-  (with-open-file (out name
-                       :direction :output   ;write to output default is input
+  (with-open-file (out name                 ; is the location, a str based on OS
+                       :direction :output   ;write to output default is read
                        :if-exists :supersede) ; if exists => override
+    (with-standard-io-syntax ;ensure everything works
+      (print *db* out)))) ;print is not format? can be read by repl reader?
+(defun load-db (name)
+  (with-open-file
+      (in name)
     (with-standard-io-syntax
-      (print *db* out))))
+      (setf *db* (read in)))))
 
-(save-db "~/my-cds.db")
+; (save-db "simple-db/my-cds.db")
+; (load-db "simple-db/my-cds.db")
+
+; QUERYING
+
+(remove-if-not #'evenp '(1 2 3 4 5 6)) ;is filter
+
+; #' to pass function as variable, otherwise, lisp lookup evenp as variable not
+; and not function
+; shorthand for (function evenp)
+
+(remove-if-not #'(lambda (x) ; lambda is how to define an anonymous function
+                   (= 1 (mod x 2))) '(1 2 3 4 5 6))
+
+(defun select-by-artist ;;specific case
+    (name)
+  (remove-if-not #'(lambda (cd)
+                     (equal (getf cd :artist) name))
+                 *db*))
+
+(defun pprint-db (l)
+  (dolist (cd l)
+    (format t "~{~a:~10t~a~%~}~%" cd)))
+
+(pprint-db (select-by-artist "chainsmokin"))
+
+(defun select ;more general
+    (selector-fn)
+  (remove-if-not selector-fn *db*))
+
+(select #'(lambda (cd)
+            (equal (getf cd :artist) "chainsmokin"))) ; still alot, whatabout
+                                                      ;:title? :rating?
+
+;=> TODO write a function that generate selector-fn
