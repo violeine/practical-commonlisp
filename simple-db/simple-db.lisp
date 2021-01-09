@@ -32,10 +32,10 @@
 
 (format t "~a:~10t~a" :artist "kenye") ;=> ARTIST:   kenye
 (format t "~a" "Kenye") ; => kenye
+
 (format t "~a" :keyword); => KEYWORD
 
 (dump-db)
-
 
 
 (defun prompt-read (prompt)
@@ -63,6 +63,7 @@
                        :if-exists :supersede) ; if exists => override
     (with-standard-io-syntax ;ensure everything works
       (print *db* out)))) ;print is not format? can be read by repl reader?
+
 (defun load-db (name)
   (with-open-file
       (in name)
@@ -70,7 +71,7 @@
       (setf *db* (read in)))))
 
 ; (save-db "simple-db/my-cds.db")
-; (load-db "simple-db/my-cds.db")
+ ;(load-db "simple-db/my-cds.db")
 
 ; QUERYING
 
@@ -104,3 +105,29 @@
                                                       ;:title? :rating?
 
 ;=> TODO write a function that generate selector-fn
+
+(defun where
+    (&key title artist rating
+          (ripped nil ripped-p)) ;default to nil, and ripped-p check is in or not
+  #'(lambda (cd)
+      (and
+        (if title (equal (getf cd :title) title) t)
+        (if artist (equal (getf cd :artist) artist) t)
+        (if rating (equal (getf cd :rating) rating) t)
+        (if ripped-p (equal (getf cd :ripped) ripped) t))))
+
+(select (where :artist "chainsmokin" ))
+
+(defun update (selector-fn &key title artist rating (ripped nil ripped-p))
+  (setf *db*
+        (mapcar
+          #'(lambda (row)
+              (when (funcall selector-fn row)
+                (if title    (setf (getf row :title) title))
+                (if artist   (setf (getf row :artist) artist))
+                (if rating   (setf (getf row :rating) rating))
+                (if ripped-p (setf (getf row :ripped) ripped)))
+              row) *db*)))
+
+(defun delete-rows (selector-fn)
+    (setf *db* (remove-if selector-fn *db*)))
