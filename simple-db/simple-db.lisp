@@ -131,3 +131,47 @@
 
 (defun delete-rows (selector-fn)
     (setf *db* (remove-if selector-fn *db*)))
+
+
+;; problem: what if you want to add/remove  field, you have to add/remove  if
+;; clause to update and where. And if you only supplied only title, why should
+;; we care about other fields?
+
+;; answer: write a function that produce only the bit you need ala macro
+
+
+(defmacro backwards (exprs) (reverse exprs))
+
+(backwards (1 2 3 +))
+
+'(1 2 3) ; return (1 2 3) instead throwing error
+
+'equal ; return symbol equal
+
+(defun make-comparision-expr
+    (field val)
+  (list 'equal (list 'getf 'cd field) val))
+
+(make-comparision-expr :rating 10);=> (EQUAL (GETF CD :RATING) 10)
+
+`(1 2 3 ,(+ 1 2)) ;` unevaluate a form, "," escape it and eval the next form
+
+(defun make-comparision-expr
+    (field value)
+  `(equal (getf cd ,field ) ,value))
+
+(make-comparision-expr :rating 10)
+
+(defun make-comparisons-list (fields)
+  (loop while fields
+     collecting (make-comparision-expr (pop fields) (pop fields))))
+
+(defmacro where (&rest clauses)
+  `#'(lambda (cd) (and ,@(make-comparisons-list clauses))))
+
+(macroexpand-1
+  '(where :title "Give Us a Break" :ripped t))
+
+(select (where :artist "chainsmokin" :ripped t))
+
+
