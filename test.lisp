@@ -73,3 +73,56 @@
                  (= (+ 1 2 3) 5)
                  (= (+ 1 2) 3)
                  (= (+ 1 2 3) 6)))
+
+;; better result reporting
+;; if so many test-suite, then we dont know which suite is failing
+
+;; dynamic-variable come to save the day
+
+(defvar *test-name* nil)
+
+(defun report-result
+    (result form)
+  (format t "~:[fail~;pass~] ... ~a: ~a~%" result *test-name* form)
+  result)
+
+(defun test-+ ()
+  (let ((*test-name* 'test-+)) ;rebind  into proper test name
+    (check
+      (= (+ 1 2 3) 5)
+      (= (+ 1 2) 3)
+      (= (+ 1 2 3) 6))))
+
+(defun test-* ()
+  (let ((*test-name* 'test-*))
+    (check
+      (= (* 1 2 3) 6)
+      (= (* 1 2) 2)
+      (= (* 1 2 3) 6))))
+
+(defun test-arithmetic ()
+  (combine-results
+    (test-+)
+    (test-*)))
+
+(test-arithmetic)
+
+;; but we can do better, cus we still have to manually bind *test-name*
+
+(defmacro deftest (name params &body body)
+  `(defun ,name ,params
+     (let ((*test-name* (append *test-name* (list ',name))))
+       ,@body)))
+
+(deftest test-+ ()
+    (check
+      (= (+ 1 2 3) 5)
+      (= (+ 1 2) 3)
+      (= (+ 1 2 3) 6)))
+
+(macroexpand '(deftest test-arithmetic ()
+  (combine-results
+    (test-+))))
+
+(test-arithmetic)
+
